@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOR MY FAVORITE PERSON ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --main-pink: #ff4d6d; --bg-pink: #fff0f3; }
+        body { 
+            background-color: var(--bg-pink); 
+            font-family: 'Fredoka One', cursive; 
+            margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden;
+        }
+        .card { 
+            background: white; padding: 30px; border-radius: 40px; border: 6px solid var(--main-pink);
+            box-shadow: 0 10px 0px rgba(255, 77, 109, 0.2); 
+            width: 85%; max-width: 400px; text-align: center; position: relative;
+        }
+        .hidden { display: none !important; }
+        h1 { color: var(--main-pink); font-size: 1.5rem; text-transform: uppercase; }
+
+        /* --- QUESTION 1: HEART --- */
+        #circle-container {
+            width: 180px; height: 180px; border: 6px dashed var(--main-pink); border-radius: 50%;
+            margin: 20px auto; display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+        #heart { font-size: 50px; color: var(--main-pink); transition: font-size 0.1s ease; }
+        
+        .slider-container { margin-top: 20px; }
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 20px; background: #ffccd5; border-radius: 10px; outline: none; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 35px; height: 35px; background: var(--main-pink); border-radius: 50%; border: 3px solid white;
+        }
+
+        /* --- OPTIONS & CROSS --- */
+        .option {
+            background: #fff; padding: 15px; margin: 10px 0; border-radius: 15px;
+            cursor: pointer; transition: 0.3s; border: 3px solid #eee;
+            font-size: 1rem; font-weight: bold; text-transform: uppercase; position: relative;
+        }
+        .faded { opacity: 0.2; pointer-events: none; }
+        .cross { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; color: red; z-index: 10; font-family: Arial; }
+
+        /* --- THE BIG U --- */
+        #central-u { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; cursor: pointer; width: 100%; }
+        #bigU { font-size: 160px; color: var(--main-pink); text-shadow: 6px 6px 0 #fff; animation: bounce 0.5s infinite alternate; display: block; }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.15); } }
+    </style>
+</head>
+<body>
+
+    <div id="step1" class="card">
+        <h1>HOW MUCH DO YOU LOVE ME?</h1>
+        <p>SLIDE <b>FAST</b> TO GROW THE HEART!</p>
+        <div id="circle-container"><div id="heart">❤️</div></div>
+        <div class="slider-container">
+            <input type="range" id="loveSlider" min="0" max="100" value="0">
+        </div>
+    </div>
+
+    <div id="step2" class="card hidden">
+        <h1>WHICH IS MY FAVOURITE PHOTO? 📸</h1>
+        <div class="option" onclick="handleWrong(this, 'photo')">KOCHI PHOTO SHOOT</div>
+        <div class="option" onclick="handleWrong(this, 'photo')">JEW STREET BACK PHOTO</div>
+        <div class="option" onclick="handleWrong(this, 'photo')">LOOKING YOU IN A SAREE</div>
+        <div class="option" onclick="handleWrong(this, 'photo')">AGRA TAJ MAHAL PHOTO</div>
+        <div id="msg2" class="hidden" style="color:var(--main-pink); margin-top:10px;">UNNODA ELLA PHOTOVUM PUDIKUM! 🥰</div>
+    </div>
+
+    <div id="step3" class="card hidden">
+        <div id="food-list">
+            <h1>WHICH IS MY FAVOURITE FOOD? 🍕</h1>
+            <div class="option" onclick="handleWrong(this, 'food')">BRIYANI</div>
+            <div class="option" onclick="handleWrong(this, 'food')">KOTHU PAROTTA</div>
+            <div class="option" onclick="handleWrong(this, 'food')">PALAYA SOORU</div>
+            <div class="option" onclick="handleWrong(this, 'food')">PARUPPU KOLAMBU</div>
+        </div>
+        <div id="central-u" class="hidden" onclick="celebrate()">
+            <div style="font-size: 50px;">❤️</div>
+            <span id="bigU">U</span>
+            <div style="font-size: 25px;">👆 CLICK ME!</div>
+        </div>
+    </div>
+
+    <div id="step4" class="card hidden">
+        <h1>YOU ARE MY EVERYTHING! 🎉</h1>
+        <p>I love you more than words (and code) can say! ❤️✨</p>
+    </div>
+
+    <script>
+        const slider = document.getElementById('loveSlider');
+        const heart = document.getElementById('heart');
+        let lastVal = 0;
+        let lastTime = Date.now();
+        let photoClick = 0;
+        let foodClick = 0;
+
+        // FIXED SLIDER LOGIC
+        slider.addEventListener('input', () => {
+            const now = Date.now();
+            const currentVal = parseInt(slider.value);
+            const timeDiff = now - lastTime;
+            const valDiff = Math.abs(currentVal - lastVal);
+            
+            // Calculate speed
+            const speed = valDiff / (timeDiff || 1); 
+
+            // If sliding fast, heart gets HUGE
+            if (speed > 0.3) {
+                heart.style.fontSize = (currentVal + 70) + "px";
+            } else {
+                heart.style.fontSize = "50px"; // Reset if too slow
+            }
+
+            // Next step if heart is big enough and slider is at the end
+            if (currentVal > 90 && parseInt(heart.style.fontSize) > 140) {
+                setTimeout(() => {
+                    document.getElementById('step1').classList.add('hidden');
+                    document.getElementById('step2').classList.remove('hidden');
+                }, 400);
+            }
+
+            lastVal = currentVal;
+            lastTime = now;
+        });
+
+        function handleWrong(el, type) {
+            if (el.classList.contains('faded')) return;
+            
+            // Add the ❌
+            const cross = document.createElement('div');
+            cross.className = 'cross';
+            cross.innerText = '❌';
+            el.appendChild(cross);
+            el.classList.add('faded');
+
+            if (type === 'photo') {
+                photoClick++;
+                if (photoClick === 4) {
+                    document.getElementById('msg2').classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('step2').classList.add('hidden');
+                        document.getElementById('step3').classList.remove('hidden');
+                    }, 2500);
+                }
+            } else {
+                foodClick++;
+                if (foodClick === 4) {
+                    document.getElementById('food-list').classList.add('hidden');
+                    document.getElementById('central-u').classList.remove('hidden');
+                }
+            }
+        }
+
+        function celebrate() {
+            confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } });
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('step4').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
